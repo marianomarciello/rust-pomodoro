@@ -27,12 +27,12 @@ impl Config {
                      .short("d")
                      .long("dur")
                      .takes_value(true)
-                     .help("Duration of each pomodoro"))
+                     .help("Duration of each pomodoro (in minutes)"))
             .arg(Arg::with_name("pause")
                      .short("p")
                      .long("pause")
                      .takes_value(true)
-                     .help("Duration of each pause"))
+                     .help("Duration of each pause (in minutes)"))
             .get_matches();
 
 
@@ -77,14 +77,14 @@ impl Config {
     }
 }
 
-pub fn timer(time : u32, pomo: u32) {
+pub fn timer(time : u32, value: u32, tag: &str) {
     // start timer
     let duration = Duration::from_secs(1);
     let mut elapsed_sec = 0;
     let mut elapsed_min = 0;
     for _t in 0..time*60{
         print!("{esc}c", esc = 27 as char);
-        println!("Pomodoro n° {}", pomo);
+        println!("{} n° {}", tag, value);
         println!("Elapsed min:{} sec:{}", elapsed_min, elapsed_sec);
         elapsed_sec += 1;
         elapsed_min += (elapsed_sec/60) % 60;
@@ -97,11 +97,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     println!("Start focus");
     for pomo in 0..config.num_pomodoro {
-        timer(config.dur_pomodoro, pomo);
+        timer(config.dur_pomodoro, pomo, "Pomodoro");
 
         println!("Great job take a break!!");
 
-        timer(config.dur_pause, pomo);
+        timer(config.dur_pause, pomo, "Pause");
 
         if pomo != 0 {
             println!("Go back to work!!");

@@ -4,7 +4,7 @@ use pomodoro::Config;
 fn main() {
     let app_name = "pomodoro";
     let config = Config::new().unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
+        eprintln!("Error during argument parsing: {}", err);
         eprintln!("try {} --help", app_name);
         process::exit(1);
     });
