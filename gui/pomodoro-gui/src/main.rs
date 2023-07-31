@@ -1,6 +1,6 @@
 mod pomodoro;
 use pomodoro::Pomodoro;
-use iced::{Sandbox, Settings};
+use iced::{Application, Settings};
 
 
 fn main() {

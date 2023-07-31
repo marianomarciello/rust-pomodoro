@@ -1,5 +1,16 @@
+use std::time::Instant;
+
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
-    IncrementPressed,
-    DecrementPressed,
+    IncrementPomodoroCounter,
+    DecrementPomodoroCounter,
+    IncrementPomodoroDuration,
+    DecrementPomodoroDuration,
+    IncrementBreakCounter,
+    DecrementBreakCounter,
+    IncrementBreakDuration,
+    DecrementBreakDuration,
+    StartPressed,
+    StopPressed,
+    Tick(Instant),
 }
