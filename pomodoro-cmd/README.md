@@ -7,8 +7,6 @@ cargo build --release
 ```
 ## Usage
 ```sh
-pomodoro 0.1.0
-Mariano Marciello
 A minimal pomodoro timer
 
 USAGE:

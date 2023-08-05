@@ -1,8 +1,8 @@
-mod pomodoro;
+mod gui;
 use iced::{Application, Settings};
-use pomodoro::Pomodoro;
+use gui::Pomodoro;
 
 fn main() {
-    Pomodoro::run(Settings::default());
+    let _ = Pomodoro::run(Settings::default());
     println!("Hello, world!");
 }

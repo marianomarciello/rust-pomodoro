@@ -12,12 +12,10 @@ pub struct Config {
 impl Config {
     pub fn new() -> Result<Config, &'static str> {
 
-        let app_name = "pomodoro";
+        let app_name = "pomodoro-cmd";
 
         let matches = App::new(app_name)
-            .version("0.1.0")
-            .author("Mariano Marciello")
-            .about("A minimal pomodoro timer")
+            .about("A minimal pomodoro timer.")
             .arg(Arg::with_name("pomo")
                      .short("t")
                      .long("pomo")
@@ -88,7 +86,7 @@ pub fn timer(time : u32, value: u32, tag: &str) {
         println!("Elapsed min:{} sec:{}", elapsed_min, elapsed_sec);
         elapsed_sec += 1;
         elapsed_min += (elapsed_sec/60) % 60;
-        elapsed_sec = elapsed_sec % 60;
+        elapsed_sec %= 60;
         thread::sleep(duration);
     }
 }

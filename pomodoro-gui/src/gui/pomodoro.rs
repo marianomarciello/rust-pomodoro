@@ -1,6 +1,6 @@
-use crate::pomodoro::message::Message;
+use crate::gui::message::Message;
 use iced::executor;
-use iced::theme::{self, Theme};
+use iced::theme::{Theme};
 use iced::widget::{button, column, row, text};
 use iced::{Application, Command, Element, Subscription};
 use std::time::{Duration, Instant};
@@ -151,11 +151,11 @@ impl Application for Pomodoro {
                 }
             }
             Message::StartPressed => {
-                if self.is_pomodoro && (self.pomodoro_counter <= 0 || self.pomodoro_duration <= 0) {
+                if self.is_pomodoro && (self.pomodoro_counter == 0 || self.pomodoro_duration == 0) {
                     // no pomodoro number set
                     self.str_pomodoro = "Please set a valid Pomodoro number".to_string();
                     return Command::none();
-                } else if !self.is_pomodoro && self.break_duration <= 0 {
+                } else if !self.is_pomodoro && self.break_duration == 0 {
                     self.str_pomodoro = "Please set a valid Break duration".to_string();
                     return Command::none();
                 }
