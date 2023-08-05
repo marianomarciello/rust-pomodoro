@@ -1,7 +1,6 @@
 mod pomodoro;
-use pomodoro::Pomodoro;
 use iced::{Application, Settings};
-
+use pomodoro::Pomodoro;
 
 fn main() {
     Pomodoro::run(Settings::default());

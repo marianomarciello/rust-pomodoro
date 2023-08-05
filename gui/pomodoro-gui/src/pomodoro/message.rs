@@ -6,8 +6,6 @@ pub enum Message {
     DecrementPomodoroCounter,
     IncrementPomodoroDuration,
     DecrementPomodoroDuration,
-    IncrementBreakCounter,
-    DecrementBreakCounter,
     IncrementBreakDuration,
     DecrementBreakDuration,
     StartPressed,

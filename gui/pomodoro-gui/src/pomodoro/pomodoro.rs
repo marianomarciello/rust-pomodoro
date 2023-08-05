@@ -1,9 +1,8 @@
-use iced::widget::{button, column, text, row};
-use iced::{Application, Command, Element, Subscription};
-use iced::theme::{self, Theme};
-use iced::executor;
 use crate::pomodoro::message::Message;
-use std::{thread, time};
+use iced::executor;
+use iced::theme::{self, Theme};
+use iced::widget::{button, column, row, text};
+use iced::{Application, Command, Element, Subscription};
 use std::time::{Duration, Instant};
 
 // https://github.com/iced-rs/iced/blob/0.10/examples/stopwatch/src/main.rs
@@ -19,17 +18,19 @@ enum State {
 
 pub struct Pomodoro {
     // pomodoro duration in minutes
-    pomodoro_duration: u32,
+    pomodoro_duration: u64,
     // pomodoro counter
     pomodoro_counter: u32,
     // pomodoro break duration in minutes
-    break_duration: u32,
-    // pomodoro break duration counter
-    break_counter: u32,
+    break_duration: u64,
 
+    // timer
     elapsed_time: Stopwatch,
     // true if pomodoro false otherwise
     is_pomodoro: bool,
+
+    // string to print in the gui
+    str_pomodoro: String,
 }
 
 impl Application for Pomodoro {
@@ -39,18 +40,19 @@ impl Application for Pomodoro {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
-        (Self {
-            pomodoro_duration: 0,
-            pomodoro_counter: 0,
-            break_duration: 0,
-            break_counter: 0,
-            elapsed_time: Stopwatch {
-                duration: Duration::default(),
-                state: State::Idle,
+        (
+            Self {
+                pomodoro_duration: 0,
+                pomodoro_counter: 0,
+                break_duration: 0,
+                elapsed_time: Stopwatch {
+                    duration: Duration::default(),
+                    state: State::Idle,
+                },
+                is_pomodoro: true,
+                str_pomodoro: "Start a new Pomodoro".to_string(),
             },
-            is_pomodoro: false,
-        },
-        Command::none()
+            Command::none(),
         )
     }
 
@@ -60,71 +62,63 @@ impl Application for Pomodoro {
 
     fn view(&self) -> Element<Message> {
         // use a simple vertical layout
-        const SECOND: u64 = 60;
-        const MINUTE : u64 = 60 * SECOND;
+        const MINUTE: u64 = 60;
 
-        let second = self.elapsed_time.duration.as_secs();
         let font_size = 20;
         let pomodoro_duration_text = format!("{} minutes", self.pomodoro_duration);
         let break_duration_text = format!("{} minutes", self.break_duration);
-        let clock_str = format!("{} minutes:{} seconds",
-            second / MINUTE,
-            second);
-        row![
-            column![
-                row![
-                    text("Pomodoro: "),
-                ].padding(10)
+        column![
+            row![text("Pomodoro: "),]
+                .padding(10)
                 .align_items(iced::Alignment::Start),
-                row![
-
-                    button("-").on_press(Message::DecrementPomodoroCounter),
-                    text(self.pomodoro_counter).size(font_size),
-                    button("+").on_press(Message::IncrementPomodoroCounter),
-                ].padding(10)
-                .align_items(iced::Alignment::Center),
-                row![
-                    text("Pomodoro duration: "),
-                ].padding(10)
+            row![
+                button("-").on_press(Message::DecrementPomodoroCounter),
+                text(self.pomodoro_counter).size(font_size),
+                button("+").on_press(Message::IncrementPomodoroCounter),
+            ]
+            .padding(10)
+            .align_items(iced::Alignment::Center),
+            row![
+                column![text("Pomodoro duration:")]
+                .padding([0, 10])
                 .align_items(iced::Alignment::Start),
-                row![
-                    button("-").on_press(Message::DecrementPomodoroDuration),
-                    text(pomodoro_duration_text).size(font_size),
-                    button("+").on_press(Message::IncrementPomodoroDuration),
-                ].padding(20)
-                .align_items(iced::Alignment::Center),
-                row![
-                    button("Start").on_press(Message::StartPressed),
-                ].align_items(iced::Alignment::Center),
+                column![text("Break duration:")]
+                .padding([0, 10])
+                .align_items(iced::Alignment::Start),
             ],
-            column![
-                row![
-                    text("Break: "),
-                ].padding(10)
+            row![
+                column![
+                button("+").on_press(Message::IncrementPomodoroDuration),
+                text(pomodoro_duration_text).size(font_size),
+                button("-").on_press(Message::DecrementPomodoroDuration),
+                ].padding([0, 10])
                 .align_items(iced::Alignment::Start),
-                row![
-                    button("-").on_press(Message::DecrementBreakCounter),
-                    text(self.break_counter).size(font_size),
-                    button("+").on_press(Message::IncrementBreakCounter),
-                ].padding(10)
-                .align_items(iced::Alignment::Center),
-                row![
-                    text("Break duration: "),
-                ].padding(10)
+                column![
+                button("+").on_press(Message::IncrementBreakDuration),
+                text(break_duration_text).size(font_size),
+                button("-").on_press(Message::DecrementBreakDuration),
+                ].padding([0, 85])
                 .align_items(iced::Alignment::Start),
-                row![
-                    button("-").on_press(Message::DecrementBreakDuration),
-                    text(break_duration_text).size(font_size),
-                    button("+").on_press(Message::IncrementBreakDuration),
-                ].padding(20)
-                .align_items(iced::Alignment::Center),
-                row![
-                button("Stop").on_press(Message::StopPressed),
-                ].align_items(iced::Alignment::Center),
-                row![
-                text(clock_str).size(font_size),
-                ].align_items(iced::Alignment::Center),
+            ]
+            .padding(10)
+            .align_items(iced::Alignment::Center),
+            row![
+                column![button("Start").on_press(Message::StartPressed)]
+                .padding(10)
+                .align_items(iced::Alignment::Start),
+                column![button("Stop").on_press(Message::StopPressed)]
+                .padding(10)
+                .align_items(iced::Alignment::Start),
             ],
+            row![text(self.str_pomodoro.clone()).size(font_size)]
+                .padding(10)
+                .align_items(iced::Alignment::Center),
+            row![text(format!("{} min {} sec",
+                    self.elapsed_time.duration.as_secs() / MINUTE,
+                    self.elapsed_time.duration.as_secs() % MINUTE
+                )).size(font_size),]
+                .padding(10)
+                .align_items(iced::Alignment::Center),
         ]
         .into()
     }
@@ -136,7 +130,7 @@ impl Application for Pomodoro {
             }
             Message::DecrementPomodoroCounter => {
                 if self.pomodoro_counter != 0 {
-                   self.pomodoro_counter -= 1;
+                    self.pomodoro_counter -= 1;
                 }
             }
             Message::IncrementPomodoroDuration => {
@@ -148,14 +142,6 @@ impl Application for Pomodoro {
                 }
             }
 
-            Message::IncrementBreakCounter => {
-                self.break_counter += 1;
-            }
-            Message::DecrementBreakCounter => {
-                if self.break_counter != 0 {
-                    self.break_counter -= 1;
-                }
-            }
             Message::IncrementBreakDuration => {
                 self.break_duration += 1;
             }
@@ -165,30 +151,63 @@ impl Application for Pomodoro {
                 }
             }
             Message::StartPressed => {
+                if self.is_pomodoro && (self.pomodoro_counter <= 0 || self.pomodoro_duration <= 0) {
+                    // no pomodoro number set
+                    self.str_pomodoro = "Please set a valid Pomodoro number".to_string();
+                    return Command::none();
+                }
                 self.elapsed_time.state = State::Ticking {
-                    last_tick: Instant::now()
+                    last_tick: Instant::now(),
                 };
-                self.is_pomodoro = true;
-                println!("Nothing to see here mate");
             }
 
             Message::Tick(now) => {
-                if let State::Ticking { last_tick} = &mut self.elapsed_time.state {
+                if let State::Ticking { last_tick } = &mut self.elapsed_time.state {
                     self.elapsed_time.duration += now - *last_tick;
                     *last_tick = now;
+                    if self.is_pomodoro {
+                        self.str_pomodoro = "Stay focused ^-^".to_string();
+                    } else {
+                        self.str_pomodoro = "Chill Bro :)".to_string();
+                    }
+                }
+                // end of a pomodoro
+                if self.is_pomodoro
+                    && self.elapsed_time.duration.as_secs() >= self.pomodoro_duration * 60
+                {
+                    self.elapsed_time.state = State::Idle;
+                    self.elapsed_time.duration = Duration::default();
+                    self.pomodoro_counter -= 1;
+                    self.is_pomodoro = false;
+                    self.str_pomodoro = "Start a new Break".to_string();
+                }
+
+                // end of a break
+                if !self.is_pomodoro
+                    && self.elapsed_time.duration.as_secs() >= self.break_duration * 60
+                {
+                    self.elapsed_time.state = State::Idle;
+                    self.elapsed_time.duration = Duration::default();
+                    self.is_pomodoro = true;
+                    self.str_pomodoro = "Star a new Pomodoro".to_string();
                 }
             }
 
+            // stop timer
             Message::StopPressed => {
-                self.is_pomodoro = false;
-                println!("Nothing to see here mate");
+                self.elapsed_time.state = State::Idle;
             }
         }
 
         Command::none()
-
     }
 
-    //fn subscription(&self) -> Subscription<Message> {
-    //}
+    fn subscription(&self) -> Subscription<Message> {
+        match self.elapsed_time.state {
+            State::Idle => Subscription::none(),
+            State::Ticking { .. } => {
+                iced::time::every(Duration::from_millis(10)).map(Message::Tick)
+            }
+        }
+    }
 }
