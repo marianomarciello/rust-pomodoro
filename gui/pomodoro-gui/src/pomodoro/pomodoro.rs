@@ -155,6 +155,9 @@ impl Application for Pomodoro {
                     // no pomodoro number set
                     self.str_pomodoro = "Please set a valid Pomodoro number".to_string();
                     return Command::none();
+                } else if !self.is_pomodoro && self.break_duration <= 0 {
+                    self.str_pomodoro = "Please set a valid Break duration".to_string();
+                    return Command::none();
                 }
                 self.elapsed_time.state = State::Ticking {
                     last_tick: Instant::now(),
@@ -171,25 +174,24 @@ impl Application for Pomodoro {
                         self.str_pomodoro = "Chill Bro :)".to_string();
                     }
                 }
-                // end of a pomodoro
-                if self.is_pomodoro
-                    && self.elapsed_time.duration.as_secs() >= self.pomodoro_duration * 60
-                {
+
+                if self.is_pomodoro &&
+                    self.elapsed_time.duration.as_secs() >= self.pomodoro_duration * 60 {
+                    // end of a pomodoro
+                    println!("end pomodoro");
                     self.elapsed_time.state = State::Idle;
                     self.elapsed_time.duration = Duration::default();
                     self.pomodoro_counter -= 1;
                     self.is_pomodoro = false;
                     self.str_pomodoro = "Start a new Break".to_string();
-                }
-
-                // end of a break
-                if !self.is_pomodoro
-                    && self.elapsed_time.duration.as_secs() >= self.break_duration * 60
-                {
+                } else if !self.is_pomodoro &&
+                   self.elapsed_time.duration.as_secs() >= self.break_duration * 60 {
+                    println!("end break");
+                    // end of break
                     self.elapsed_time.state = State::Idle;
                     self.elapsed_time.duration = Duration::default();
                     self.is_pomodoro = true;
-                    self.str_pomodoro = "Star a new Pomodoro".to_string();
+                    self.str_pomodoro = "Start a new Pomodoro".to_string();
                 }
             }
 
