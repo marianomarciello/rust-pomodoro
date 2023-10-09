@@ -115,11 +115,13 @@ impl App {
     pub fn toggle_start_stop(&mut self) {
         match self.state {
             AppState::RunPomo => { 
-                // TODO: ring a bell
                 self.state = AppState::StopPomo;
             },
             AppState::StopPomo => { 
                 if self.pomo_dur == Duration::ZERO {
+                    // TODO: ring a bell
+                    // decrease pomo_num
+                    self.decrement_pomo_num();
                     self.pomo_dur = self.pomo_dur_bk;
                     self.break_dur = self.break_dur_bk;
                     self.start_time = Instant::now();
@@ -155,6 +157,8 @@ impl App {
            self.pomo_dur = res;
        } else {
            self.pomo_dur = Duration::ZERO;
+           self.state = AppState::StopPomo;
+           self.toggle_start_stop();
        }
     }
 
@@ -166,6 +170,8 @@ impl App {
            self.break_dur = res;
        } else {
            self.break_dur = Duration::ZERO;
+           self.state = AppState::StopBreak;
+           self.toggle_start_stop();
        }
     }
 
@@ -214,9 +220,7 @@ impl App {
     }
     fn decrement_pomo_num(&mut self) {
         if let Some(res) = self.pomo_num.checked_sub(1) {
-            if self.pomo_num > 1 {
-                self.pomo_num = res;
-            }
+            self.pomo_num = res;
         }
     }
 }
