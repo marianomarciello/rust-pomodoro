@@ -130,8 +130,8 @@ fn top_bar<'a>(app: &'a App, bar_element: &'a TopBar) -> Paragraph<'a> {
 
 fn center_clock(app: &App) -> BigText {
     let style = match app.state {
-        AppState::StopPomo | AppState::StopBreak =>  Style::new().green(),
-        AppState::RunPomo |  AppState::RunBreak => Style::new().green(),
+        AppState::StopPomo | AppState::StopBreak =>  Style::new().yellow(),
+        AppState::RunPomo |  AppState::RunBreak => Style::new().red(),
         
     };
 
@@ -151,7 +151,7 @@ fn center_clock(app: &App) -> BigText {
 fn motivation_text(app: &App) -> BigText {
     let style = match app.state {
         AppState::StopPomo | AppState::StopBreak =>  Style::new().green(),
-        AppState::RunPomo |  AppState::RunBreak => Style::new().green(),
+        AppState::RunPomo |  AppState::RunBreak => Style::new().yellow(),
         
     };
 
