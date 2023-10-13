@@ -30,3 +30,10 @@ OPTIONS:
 A gui version of a pomodoro timer. The gui is based on
 [https://iced.rs/](iced).
 
+![Pomodoro Gui](./docs/img/pomodoro-gui.png?raw=true)
+
+## pomodoro-tui
+A gui version of a pomodoro timer. The gui is based on
+[https://docs.rs/ratatui/latest/ratatui/](ratatui).
+
+![Pomodoro Tui](./docs/img/pomodoro-tui.png?raw=true)
