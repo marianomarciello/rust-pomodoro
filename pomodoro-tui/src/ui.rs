@@ -3,6 +3,7 @@ use ratatui::{
     style::{Color, Style, Stylize},
     widgets::{Block, BorderType, Borders, Paragraph}, prelude::{Layout, Constraint, Direction}, text::Line,
 };
+use tui_big_text::BigText;
 
 use crate::{App, app::EditApp};
 
@@ -37,6 +38,10 @@ pub fn render(app: &App, f: &mut Frame) {
         text: String::from(format!("{}", format_duration(&app.break_dur))),
     }),layout[2]);
 
+    f.render_widget(motivation_text(app), layout[5]);
+
+    f.render_widget(center_clock(app), layout[7]);
+
     f.render_widget(help_paragraph(app),layout[3]);
 }
 
@@ -44,18 +49,18 @@ fn layout(area: Rect) -> Vec<Rect> {
     let layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![
-            Constraint::Max(15), // top bar
+            Constraint::Min(15), // top bar
             Constraint::Percentage(70), // timer
-            Constraint::Max(5), // help paragraph
+            Constraint::Min(6), // help paragraph
         ])
         .split(area);
 
     let top_pomo_num = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![
-            Constraint::Max(5), // num of pomo
-            Constraint::Max(5), // pomo dur
-            Constraint::Max(5), // break dur
+            Constraint::Percentage(33), // num of pomo
+            Constraint::Percentage(33), // pomo dur
+            Constraint::Percentage(33), // break dur
         ])
         .split(layout[0]);
 
@@ -66,9 +71,35 @@ fn layout(area: Rect) -> Vec<Rect> {
         ])
         .split(layout[2]);
 
+    let main_area = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![
+            Constraint::Percentage(40), // help
+            Constraint::Percentage(60), // help
+        ])
+        .split(layout[1]);
+
+    let motivation_area = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![
+            Constraint::Percentage(35),
+            Constraint::Percentage(65),
+        ])
+        .split(main_area[0]);
+
+    let clock_area = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![
+            Constraint::Percentage(35),
+            Constraint::Percentage(65),
+        ])
+        .split(main_area[1]);
+
     top_pomo_num[..].iter().chain(
         help_bar[..].iter()).chain(
-        layout[1..].iter()).copied()
+        motivation_area[..].iter()).chain(
+        clock_area[..].iter()).chain(
+        layout[2..].iter()).copied()
         .collect()
 }
 
@@ -97,18 +128,69 @@ fn top_bar<'a>(app: &'a App, bar_element: &'a TopBar) -> Paragraph<'a> {
     }
 }
 
+fn center_clock(app: &App) -> BigText {
+    let style = match app.state {
+        AppState::StopPomo | AppState::StopBreak =>  Style::new().green(),
+        AppState::RunPomo |  AppState::RunBreak => Style::new().green(),
+        
+    };
+
+    let duration = match app.state {
+        AppState::StopPomo | AppState::RunPomo =>  format_duration(&app.pomo_dur),
+        AppState::StopBreak | AppState::RunBreak =>  format_duration(&app.break_dur),
+    };
+
+    tui_big_text::BigTextBuilder::default()
+        .style(style)
+        .lines(vec![
+            Line::from(duration)
+        ])
+        .build().unwrap()
+}
+
+fn motivation_text(app: &App) -> BigText {
+    let style = match app.state {
+        AppState::StopPomo | AppState::StopBreak =>  Style::new().green(),
+        AppState::RunPomo |  AppState::RunBreak => Style::new().green(),
+        
+    };
+
+    let motivation_string = match app.state {
+        AppState::StopPomo => vec!["Time to focus", "press space"],
+        AppState::RunPomo =>  vec!["Focus", "don't look at me!! "],
+        AppState::StopBreak => vec!["Time to take a break", "press space"],
+        AppState::RunBreak =>  vec!["Take a break", "enjoy your coffe :)"],
+    };
+
+    tui_big_text::BigTextBuilder::default()
+        .style(style)
+        .lines(vec![
+            Line::from(motivation_string[0]),
+            Line::from(motivation_string[1])
+        ])
+        .build().unwrap()
+}
+
 fn help_paragraph(app: &App) -> Paragraph<'_> {
   let space_action = match app.state {
     AppState::StopPomo | AppState::StopBreak => "start",
     _ => "stop"
   };
+  let next_element = match app.edit_app {
+      EditApp::Nothing => "edit pomodoro's number",
+      EditApp::PomoNum => "edit pomodoro's duration",
+      EditApp::PomoDur => "edit break's duration",
+      EditApp::BreakDur => "No action",
+  };
+
+
   let help_text =
     Line::from(
         vec![
         "space ".into(),
         space_action.dim(),
-        " enter".into(),
-        " stop".dim(),
+        " tab => ".into(),
+        next_element.yellow() ,
         " j".into(),
         " increase".dim(),
         " k".into(),
@@ -116,6 +198,7 @@ fn help_paragraph(app: &App) -> Paragraph<'_> {
         " q".into(),
         " quit".dim(),
         ]);
+
   Paragraph::new(help_text)
       .gray()
       .alignment(Alignment::Center)
