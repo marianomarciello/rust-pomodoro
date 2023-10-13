@@ -40,7 +40,7 @@ pub fn render(app: &App, f: &mut Frame) {
 
     f.render_widget(motivation_text(app), layout[5]);
 
-    f.render_widget(center_clock(app), layout[7]);
+    f.render_widget(center_clock(app), layout[8]);
 
     f.render_widget(help_paragraph(app),layout[3]);
 }
@@ -82,8 +82,9 @@ fn layout(area: Rect) -> Vec<Rect> {
     let motivation_area = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![
-            Constraint::Percentage(35),
-            Constraint::Percentage(65),
+            Constraint::Percentage(20),
+            Constraint::Percentage(60),
+            Constraint::Percentage(20),
         ])
         .split(main_area[0]);
 
@@ -132,12 +133,14 @@ fn center_clock(app: &App) -> BigText {
     let style = match app.state {
         AppState::StopPomo | AppState::StopBreak =>  Style::new().yellow(),
         AppState::RunPomo |  AppState::RunBreak => Style::new().red(),
+        AppState::NoMorePomo => Style::new().green(),
         
     };
 
     let duration = match app.state {
         AppState::StopPomo | AppState::RunPomo =>  format_duration(&app.pomo_dur),
         AppState::StopBreak | AppState::RunBreak =>  format_duration(&app.break_dur),
+        AppState::NoMorePomo => String::from(""),
     };
 
     tui_big_text::BigTextBuilder::default()
@@ -148,27 +151,27 @@ fn center_clock(app: &App) -> BigText {
         .build().unwrap()
 }
 
-fn motivation_text(app: &App) -> BigText {
+fn motivation_text(app: &App) -> Paragraph<'_>{
     let style = match app.state {
         AppState::StopPomo | AppState::StopBreak =>  Style::new().green(),
         AppState::RunPomo |  AppState::RunBreak => Style::new().yellow(),
+        AppState::NoMorePomo => Style::new().green(),
         
     };
 
     let motivation_string = match app.state {
-        AppState::StopPomo => vec!["Time to focus", "press space"],
-        AppState::RunPomo =>  vec!["Focus", "don't look at me!! "],
-        AppState::StopBreak => vec!["Time to take a break", "press space"],
-        AppState::RunBreak =>  vec!["Take a break", "enjoy your coffe :)"],
+        AppState::StopPomo => "Time to focus, press space",
+        AppState::RunPomo =>  "Focus, don't look at me!!",
+        AppState::StopBreak => "Time to take a break, press space",
+        AppState::RunBreak =>  "Take a break, enjoy your coffe :)",
+        AppState::NoMorePomo => "0 Pomodoro Left, add more pomodoros"
     };
-
-    tui_big_text::BigTextBuilder::default()
-        .style(style)
-        .lines(vec![
-            Line::from(motivation_string[0]),
-            Line::from(motivation_string[1])
-        ])
-        .build().unwrap()
+    Paragraph::new(motivation_string)
+        .alignment(Alignment::Center)
+        .block(Block::default()
+        .title_style(Style::default()).cyan()
+        .title_alignment(Alignment::Center)
+        .style(style))
 }
 
 fn help_paragraph(app: &App) -> Paragraph<'_> {

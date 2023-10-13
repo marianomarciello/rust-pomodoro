@@ -17,6 +17,7 @@ pub enum AppState {
     RunPomo,
     StopBreak,
     RunBreak,
+    NoMorePomo,
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -130,6 +131,9 @@ impl App {
                     self.start_time = Instant::now();
                     self.state = AppState::RunPomo;
                 }
+                if self.pomo_num == 0 {
+                    self.state = AppState::NoMorePomo
+                }
             },
             AppState::RunBreak => {
                 self.state = AppState::StopBreak;
@@ -144,6 +148,12 @@ impl App {
                 } else {
                     self.start_time = Instant::now();
                     self.state = AppState::RunBreak;
+                }
+            }
+            AppState::NoMorePomo => {
+                if self.pomo_num > 0 {
+                    self.start_time = Instant::now();
+                    self.state = AppState::RunPomo
                 }
             }
         }
