@@ -5,10 +5,8 @@ use std::time::{Duration, Instant};
  */
 // MIN_DURATION: 1 min
 const MIN_DURATION: Duration = Duration::from_secs(1 * 60);
-//const DEFAULT_POMO_DUR: Duration = Duration::from_secs(50 * 60);
-const DEFAULT_POMO_DUR: Duration = Duration::from_secs(1 * 10);
-//const DEFAULT_BREAK_DUR: Duration = Duration::from_secs(15 * 60);
-const DEFAULT_BREAK_DUR: Duration = Duration::from_secs(1 * 10);
+const DEFAULT_POMO_DUR: Duration = Duration::from_secs(50 * 60);
+const DEFAULT_BREAK_DUR: Duration = Duration::from_secs(15 * 60);
 
 #[derive(Debug, Default)]
 pub enum AppState {
