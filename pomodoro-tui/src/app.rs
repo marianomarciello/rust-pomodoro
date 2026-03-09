@@ -1,8 +1,8 @@
 use std::time::{Duration, Instant};
 
-/**
- * Constants
- */
+//
+//Constants
+//
 // MIN_DURATION: 1 min
 const MIN_DURATION: Duration = Duration::from_secs(1 * 60);
 const DEFAULT_POMO_DUR: Duration = Duration::from_secs(50 * 60);
@@ -24,7 +24,7 @@ pub enum EditApp {
     Nothing = 0,
     PomoNum = 1,
     PomoDur = 2,
-    BreakDur = 3
+    BreakDur = 3,
 }
 
 // App state
@@ -52,11 +52,10 @@ impl Default for App {
     }
 }
 
-
 impl App {
     // constructor
     pub fn new() -> Self {
-        App { 
+        App {
             edit_app: EditApp::Nothing,
             pomo_emoji: emojis::get_by_shortcode("tomato").unwrap().to_string(),
             timer_emoji: emojis::get_by_shortcode("timer_clock").unwrap().to_string(),
@@ -68,16 +67,15 @@ impl App {
             state: AppState::StopPomo,
             start_time: Instant::now(),
             counter: 0,
-            should_quit: false
+            should_quit: false,
         }
     }
 
-    /**
-     * Pub methods
-     */
+    ///
+    /// Pub methods
+    ///
     // handles the tick event to the terminal
-    pub fn tick(&self) {
-    }
+    pub fn tick(&self) {}
 
     // set running to false to quit the app
     pub fn quit(&mut self) {
@@ -113,10 +111,10 @@ impl App {
 
     pub fn toggle_start_stop(&mut self) {
         match self.state {
-            AppState::RunPomo => { 
+            AppState::RunPomo => {
                 self.state = AppState::StopPomo;
-            },
-            AppState::StopPomo => { 
+            }
+            AppState::StopPomo => {
                 if self.pomo_dur == Duration::ZERO {
                     // TODO: ring a bell
                     // decrease pomo_num
@@ -132,10 +130,10 @@ impl App {
                 if self.pomo_num == 0 {
                     self.state = AppState::NoMorePomo
                 }
-            },
+            }
             AppState::RunBreak => {
                 self.state = AppState::StopBreak;
-            },
+            }
             AppState::StopBreak => {
                 if self.break_dur == Duration::ZERO {
                     self.break_dur = self.break_dur_bk;
@@ -157,36 +155,34 @@ impl App {
         }
     }
 
-    pub fn update_timer(&mut self, ) {
-       let now = Instant::now();
-       let elapsed = now - self.start_time;
-       if let Some(res) = self.pomo_dur.checked_sub(elapsed) {
-           self.start_time = now;
-           self.pomo_dur = res;
-       } else {
-           self.pomo_dur = Duration::ZERO;
-           self.state = AppState::StopPomo;
-           self.toggle_start_stop();
-       }
+    pub fn update_timer(&mut self) {
+        let now = Instant::now();
+        let elapsed = now - self.start_time;
+        if let Some(res) = self.pomo_dur.checked_sub(elapsed) {
+            self.start_time = now;
+            self.pomo_dur = res;
+        } else {
+            self.pomo_dur = Duration::ZERO;
+            self.state = AppState::StopPomo;
+            self.toggle_start_stop();
+        }
     }
 
     pub fn update_break_timer(&mut self) {
-       let now = Instant::now();
-       let elapsed = now - self.start_time;
-       if let Some(res) = self.break_dur.checked_sub(elapsed) {
-           self.start_time = now;
-           self.break_dur = res;
-       } else {
-           self.break_dur = Duration::ZERO;
-           self.state = AppState::StopBreak;
-           self.toggle_start_stop();
-       }
+        let now = Instant::now();
+        let elapsed = now - self.start_time;
+        if let Some(res) = self.break_dur.checked_sub(elapsed) {
+            self.start_time = now;
+            self.break_dur = res;
+        } else {
+            self.break_dur = Duration::ZERO;
+            self.state = AppState::StopBreak;
+            self.toggle_start_stop();
+        }
     }
 
-    /**
-     * Priv methods
-     */
-
+    ///
+    /// Priv methods
     fn decrement_pomo_dur(&mut self) {
         if let Some(res) = self.pomo_dur.checked_sub(Duration::from_secs(60)) {
             if res >= MIN_DURATION {
@@ -197,7 +193,7 @@ impl App {
 
     fn increment_pomo_dur(&mut self) {
         if let Some(res) = self.pomo_dur.checked_add(Duration::from_secs(60)) {
-                self.pomo_dur = res;
+            self.pomo_dur = res;
         }
     }
 
@@ -234,18 +230,16 @@ impl App {
 }
 
 mod test {
-    use crate::App;
-
     #[test]
     fn test_app_increment_counter() {
-        let mut app = App::default();
+        let mut app = crate::App::default();
         app.increment_pomo_num();
         assert_eq!(app.pomo_num, 1);
     }
 
     #[test]
     fn test_app_decrement_counter() {
-        let mut app = App::default();
+        let mut app = crate::App::default();
         app.decrement_counter();
         assert_eq!(app.counter, -1);
     }

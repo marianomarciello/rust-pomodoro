@@ -10,6 +10,7 @@ use tui_big_text::BigText;
 use crate::{app::EditApp, App};
 
 use crate::app::AppState;
+use crate::clockwidget::ClockWidget;
 use crate::tui::Frame;
 use ratatui::prelude::Rect;
 use std::time::Duration;
@@ -71,7 +72,7 @@ fn layout(area: Rect) -> Vec<Rect> {
         .constraints(vec![
             Constraint::Min(15),        // top bar
             Constraint::Percentage(70), // timer
-            Constraint::Min(6),         // help paragraph
+            Constraint::Min(15),        // help paragraph
         ])
         .split(area);
 
@@ -110,7 +111,7 @@ fn layout(area: Rect) -> Vec<Rect> {
 
     let clock_area = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(vec![Constraint::Percentage(35), Constraint::Percentage(65)])
+        .constraints(vec![Constraint::Percentage(20), Constraint::Percentage(80)])
         .split(main_area[1]);
 
     top_pomo_num[..]
@@ -124,6 +125,7 @@ fn layout(area: Rect) -> Vec<Rect> {
 }
 
 fn top_bar<'a>(app: &'a App, bar_element: &'a TopBar) -> Paragraph<'a> {
+    // App in edito mode
     if app.edit_app == bar_element.line_type {
         Paragraph::new(bar_element.text.clone())
             .style(Style::new())
@@ -163,14 +165,13 @@ fn center_clock(app: &App) -> BigText {
     let duration = match app.state {
         AppState::StopPomo | AppState::RunPomo => format_duration(&app.pomo_dur),
         AppState::StopBreak | AppState::RunBreak => format_duration(&app.break_dur),
-        AppState::NoMorePomo => String::from(""),
+        AppState::NoMorePomo => String::from("No more pomodoros!!"),
     };
 
     tui_big_text::BigTextBuilder::default()
         .style(style)
         .lines(vec![Line::from(duration)])
         .build()
-        .unwrap()
 }
 
 fn motivation_text(app: &App) -> Paragraph<'_> {
