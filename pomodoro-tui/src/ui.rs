@@ -59,7 +59,7 @@ pub fn render(app: &App, f: &mut Frame) {
 
     f.render_widget(motivation_text(app), layout[3]);
     f.render_widget(center_clock(app), layout[4]);
-    f.render_widget(help_paragraph(app), layout[6]);
+    f.render_widget(help_paragraph(app), layout[5]);
 }
 
 fn layout(area: Rect) -> Vec<Rect> {
@@ -72,6 +72,7 @@ fn layout(area: Rect) -> Vec<Rect> {
         ])
         .split(area);
 
+    // from topbar
     let top_pomo_num = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![
@@ -89,17 +90,9 @@ fn layout(area: Rect) -> Vec<Rect> {
         ])
         .split(layout[1]);
 
-    let help_bar = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(vec![
-            Constraint::Length(6), // help
-        ])
-        .split(layout[2]);
-
     top_pomo_num[..]
         .iter()
         .chain(main_area[..].iter())
-        .chain(help_bar[..].iter())
         .chain(layout[2..].iter())
         .copied()
         .collect()
