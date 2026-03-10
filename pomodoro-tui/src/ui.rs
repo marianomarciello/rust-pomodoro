@@ -5,12 +5,10 @@ use ratatui::{
     text::Line,
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use tui_big_text::BigText;
 
 use crate::{app::EditApp, App};
 
 use crate::app::AppState;
-use crate::clockwidget::ClockWidget;
 use crate::tui::Frame;
 use ratatui::prelude::Rect;
 use std::time::Duration;
@@ -22,7 +20,7 @@ struct TopBar {
 }
 
 pub fn render(app: &App, f: &mut Frame) {
-    let layout = layout(f.size());
+    let layout = layout(f.area());
     f.render_widget(
         top_bar(
             app,
@@ -59,11 +57,9 @@ pub fn render(app: &App, f: &mut Frame) {
         layout[2],
     );
 
-    f.render_widget(motivation_text(app), layout[5]);
-
-    f.render_widget(center_clock(app), layout[8]);
-
-    f.render_widget(help_paragraph(app), layout[3]);
+    f.render_widget(motivation_text(app), layout[3]);
+    f.render_widget(center_clock(app), layout[4]);
+    f.render_widget(help_paragraph(app), layout[6]);
 }
 
 fn layout(area: Rect) -> Vec<Rect> {
@@ -77,13 +73,21 @@ fn layout(area: Rect) -> Vec<Rect> {
         .split(area);
 
     let top_pomo_num = Layout::default()
-        .direction(Direction::Vertical)
+        .direction(Direction::Horizontal)
         .constraints(vec![
             Constraint::Percentage(33), // num of pomo
             Constraint::Percentage(33), // pomo dur
             Constraint::Percentage(33), // break dur
         ])
         .split(layout[0]);
+
+    let main_area = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![
+            Constraint::Percentage(20), // motivation area
+            Constraint::Percentage(80), // clock
+        ])
+        .split(layout[1]);
 
     let help_bar = Layout::default()
         .direction(Direction::Vertical)
@@ -92,33 +96,10 @@ fn layout(area: Rect) -> Vec<Rect> {
         ])
         .split(layout[2]);
 
-    let main_area = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(vec![
-            Constraint::Percentage(40), // help
-            Constraint::Percentage(60), // help
-        ])
-        .split(layout[1]);
-
-    let motivation_area = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(vec![
-            Constraint::Percentage(20),
-            Constraint::Percentage(60),
-            Constraint::Percentage(20),
-        ])
-        .split(main_area[0]);
-
-    let clock_area = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(vec![Constraint::Percentage(20), Constraint::Percentage(80)])
-        .split(main_area[1]);
-
     top_pomo_num[..]
         .iter()
+        .chain(main_area[..].iter())
         .chain(help_bar[..].iter())
-        .chain(motivation_area[..].iter())
-        .chain(clock_area[..].iter())
         .chain(layout[2..].iter())
         .copied()
         .collect()
@@ -155,7 +136,7 @@ fn top_bar<'a>(app: &'a App, bar_element: &'a TopBar) -> Paragraph<'a> {
     }
 }
 
-fn center_clock(app: &App) -> BigText {
+fn center_clock<'a>(app: &'a App) -> Paragraph<'a> {
     let style = match app.state {
         AppState::StopPomo | AppState::StopBreak => Style::new().yellow(),
         AppState::RunPomo | AppState::RunBreak => Style::new().red(),
@@ -168,10 +149,18 @@ fn center_clock(app: &App) -> BigText {
         AppState::NoMorePomo => String::from("No more pomodoros!!"),
     };
 
-    tui_big_text::BigTextBuilder::default()
+    Paragraph::new(duration)
+        .alignment(Alignment::Center)
         .style(style)
-        .lines(vec![Line::from(duration)])
-        .build()
+        .block(
+            Block::default()
+                .title("Elapsed time")
+                .title_style(Style::default())
+                .blue()
+                .title_alignment(Alignment::Center)
+                .borders(Borders::ALL)
+                .border_type(BorderType::Thick),
+        )
 }
 
 fn motivation_text(app: &App) -> Paragraph<'_> {

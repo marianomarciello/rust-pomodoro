@@ -10,7 +10,7 @@ pub mod event;
 use event::{Event, EventHandler};
 
 pub mod update;
-use update::{update, increase_timer};
+use update::{increase_timer, update};
 
 use ratatui::prelude::{CrosstermBackend, Terminal};
 
